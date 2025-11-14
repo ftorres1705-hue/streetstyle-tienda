@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StreetStyle by Juan Andrés — Tienda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* Paleta Branding */
+      --ink:#0D0D0D;           /* Negro urbano */
+      --graphite:#1F2937;      /* Gris grafito */
+      --concrete:#E5E7EB;      /* Gris claro */
+      --off:#F9FAFB;           /* Blanco roto */
+      --accent:#00D1FF;        /* Azul eléctrico acento */
+      --accent-2:#FF4D4F;      /* Rojo acento secundario */
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--off);color:var(--ink);font-family:Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    header{
+      position:sticky;top:0;z-index:10;
+      backdrop-filter:saturate(180%) blur(8px);
+      background:rgba(249,250,251,.8);
+      border-bottom:1px solid var(--concrete);
+    }
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:40px;height:40px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),#0066ff);
+      display:grid;place-items:center;color:white;font-weight:800;font-family:Poppins,Montserrat;
+      letter-spacing:.5px
+    }
+    .brand h1{font-size:18px;margin:0;line-height:1.2}
+    .tag{font-size:12px;color:#6b7280;margin-top:2px}
+    .controls{display:flex;align-items:center;gap:12px}
+    select, button, input[type="search"]{
+      border:1px solid var(--concrete);background:white;color:var(--graphite);
+      padding:10px 12px;border-radius:10px;font:inherit
+    }
+    button.primary{background:var(--ink);color:white;border:none}
+    button.ghost{background:transparent;border:1px solid var(--concrete)}
+    main{padding:24px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+    .card{background:white;border:1px solid var(--concrete);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+    .img{aspect-ratio:4/3;display:grid;place-items:center;background:linear-gradient(135deg,#111,#333);color:white;position:relative}
+    .img small{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.45);padding:4px 8px;border-radius:8px;font-size:12px}
+    .card h3{font-size:16px;margin:12px 12px 4px}
+    .price{margin:0 12px 12px;color:#111;font-weight:700}
+    .card footer{margin-top:auto;padding:12px;border-top:1px solid var(--concrete);display:flex;gap:8px}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:var(--off);border:1px solid var(--concrete);border-radius:999px;font-size:12px}
+    .layout{display:grid;grid-template-columns:1fr 320px;gap:24px}
+    @media (max-width: 960px){.layout{grid-template-columns:1fr}}
+    .panel{background:white;border:1px solid var(--concrete);border-radius:16px}
+    .panel header{padding:14px 16px;border-bottom:1px solid var(--concrete);font-weight:700}
+    .panel .content{padding:16px}
+    .cart-items{display:flex;flex-direction:column;gap:12px}
+    .cart-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center}
+    .qty{display:inline-flex;align-items:center;border:1px solid var(--concrete);border-radius:10px;overflow:hidden}
+    .qty button{border:none;background:transparent;padding:6px 10px}
+    .totals{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px dashed var(--concrete);font-weight:700}
+    .paypal-wrap{margin-top:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--ink);color:white;font-size:12px}
+    footer.site{padding:40px 24px;background:var(--ink);color:white;margin-top:40px}
+    .muted{color:#6b7280}
+  </style>
+  <!-- PayPal SDK (Sandbox). Reemplaza "sb" por tu Client ID sandbox al desplegar. -->
+  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=COP" defer></script>
+</head>
+<body>
+  <header>
+    <nav class="nav">
+      <div class="brand">
+        <div class="logo">SS</div>
+        <div>
+          <h1>StreetStyle <span class="pill">by Juan Andrés</span></h1>
+          <div class="tag">Ropa urbana cómoda, moderna y personal</div>
+        </div>
+      </div>
+      <div class="controls">
+        <input id="search" type="search" placeholder="Buscar producto…" aria-label="Buscar" />
+        <select id="filtro">
+          <option value="todas">Todas las categorías</option>
+          <option value="Hoodies">🧥 Hoodies</option>
+          <option value="Gorras">🧢 Gorras</option>
+          <option value="Busos oversize">👕 Busos oversize</option>
+        </select>
+        <button id="reset" class="ghost" title="Limpiar filtros">Limpiar</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <section>
+        <div class="panel">
+          <header>Catálogo</header>
+          <div class="content">
+            <div id="badges" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap"></div>
+            <div id="grid" class="grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside>
+        <div class="panel" id="cartPanel">
+          <header>Carrito</header>
+          <div class="content">
+            <div id="cartEmpty" class="muted">Tu carrito está vacío. Agrega productos del catálogo.</div>
+            <div id="cartList" class="cart-items"></div>
+            <div class="totals"><span>Total</span><span id="total">$0</span></div>
+            <div class="paypal-wrap">
+              <div id="paypal-button-container" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <header>Envíos y soporte</header>
+          <div class="content">
+            <p class="muted">Pagos con PayPal (sandbox) disponibles cuando haya un total > 0. Envíos nacionales (Colombia). Soporte por Instagram DM.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="container">
+      <strong>StreetStyle</strong> • Hecho con ❤ por Juan Andrés. <span class="muted">© <span id="year"></span></span>
+    </div>
+  </footer>
+
+  <script>
+    // ============================
+    // 1) DATASET INICIAL
+    // ============================
+    const productos = [
+      { id: 1, nombre: 'Hoodie “Black Street”', categoria: 'Hoodies', precio: 120000, imagen: '' },
+      { id: 2, nombre: 'Hoodie “Retro Gray”', categoria: 'Hoodies', precio: 115000, imagen: '' },
+      { id: 3, nombre: 'Gorra “NYC Flat”', categoria: 'Gorras', precio: 75000, imagen: '' },
+      { id: 4, nombre: 'Gorra “Classic White”', categoria: 'Gorras', precio: 70000, imagen: '' },
+      { id: 5, nombre: 'Buso Oversize “Storm”', categoria: 'Busos oversize', precio: 95000, imagen: '' },
+      { id: 6, nombre: 'Buso Oversize “Skyline”', categoria: 'Busos oversize', precio: 99000, imagen: '' },
+    ];
+
+    // ============================
+    // 2) UTILS
+    // ============================
+    const fmtCOP = new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP' });
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    function placeholderSVG(text){
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'>
+        <defs>
+          <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+            <stop offset='0%' stop-color='#0f172a'/>
+            <stop offset='100%' stop-color='#111827'/>
+          </linearGradient>
+        </defs>
+        <rect width='800' height='600' fill='url(#g)'/>
+        <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Poppins' font-size='44'>${text}</text>
+      </svg>`;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
+
+    // ============================
+    // 3) RENDER DEL CATÁLOGO
+    // ============================
+    function renderProductos(list){
+      const grid = $('#grid');
+      grid.innerHTML = '';
+      list.forEach(p => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        const imgURL = p.imagen || placeholderSVG(p.nombre);
+        card.innerHTML = `
+          <div class="img"><img src="${imgURL}" alt="${p.nombre}" style="max-width:90%;max-height:90%"/><small>${p.categoria}</small></div>
+          <h3>${p.nombre}</h3>
+          <p class="price">${fmtCOP.format(p.precio)}</p>
+          <footer>
+            <button class="primary" onclick="addToCart(${p.id})">Añadir</button>
+            <button class="ghost" onclick="viewOnly(${p.id})">Ver</button>
+          </footer>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // ============================
+    // 4) FILTRO POR CATEGORÍA + BÚSQUEDA
+    // ============================
+    function aplicarFiltros(){
+      const categoria = $('#filtro').value;
+      const q = $('#search').value.toLowerCase().trim();
+      let list = [...productos];
+      if(categoria !== 'todas') list = list.filter(p => p.categoria === categoria);
+      if(q) list = list.filter(p => p.nombre.toLowerCase().includes(q));
+      renderProductos(list);
+      renderBadges(categoria, q);
+    }
+
+    function renderBadges(cat, q){
+      const box = $('#badges');
+      const chips = [];
+      if(cat !== 'todas') chips.push(`<span class='badge'>Categoría: ${cat}</span>`);
+      if(q) chips.push(`<span class='badge'>Búsqueda: “${q}”</span>`);
+      box.innerHTML = chips.join('');
+    }
+
+    $('#filtro').addEventListener('change', aplicarFiltros);
+    $('#search').addEventListener('input', aplicarFiltros);
+    $('#reset').addEventListener('click', ()=>{ $('#filtro').value='todas'; $('#search').value=''; aplicarFiltros(); });
+
+    // ============================
+    // 5) CARRITO con localStorage
+    // ============================
+    const LS_KEY = 'streetstyle_cart_v1';
+    let cart = loadCart();
+    let paypalRendered = false; // controla render del botón
+
+    function loadCart(){
+      try{ return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch{ return []; }
+    }
+    function saveCart(){ localStorage.setItem(LS_KEY, JSON.stringify(cart)); }
+
+    function addToCart(id){
+      const item = cart.find(i => i.id === id);
+      if(item) item.qty += 1; else cart.push({ id, qty:1 });
+      saveCart();
+      updateCartUI();
+    }
+    function removeFromCart(id){
+      cart = cart.filter(i => i.id !== id);
+      saveCart();
+      updateCartUI();
+    }
+    function changeQty(id, d){
+      const it = cart.find(i => i.id === id);
+      if(!it) return;
+      it.qty = Math.max(1, it.qty + d);
+      saveCart();
+      updateCartUI();
+    }
+
+    function calcTotal(){
+      return cart.reduce((acc, i)=>{
+        const p = productos.find(p=>p.id===i.id);
+        return acc + (p ? p.precio * i.qty : 0);
+      }, 0);
+    }
+
+    function updateCartUI(){
+      const list = $('#cartList');
+      const empty = $('#cartEmpty');
+      list.innerHTML = '';
+      if(cart.length === 0){
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        cart.forEach(i => {
+          const p = productos.find(p=>p.id===i.id);
+          if(!p) return;
+          const row = document.createElement('div');
+          row.className = 'cart-row';
+          row.innerHTML = `
+            <div>${p.nombre}<div class='muted' style='font-size:12px'>${p.categoria}</div></div>
+            <div class='qty'>
+              <button aria-label='Disminuir' onclick='changeQty(${i.id}, -1)'>−</button>
+              <span style='padding:0 10px'>${i.qty}</span>
+              <button aria-label='Aumentar' onclick='changeQty(${i.id}, 1)'>+</button>
+            </div>
+            <div>${fmtCOP.format(p.precio * i.qty)}</div>
+            <button class='ghost' onclick='removeFromCart(${i.id})' title='Eliminar'>✕</button>
+          `;
+          list.appendChild(row);
+        });
+      }
+      const total = calcTotal();
+      $('#total').textContent = fmtCOP.format(total);
+      togglePayPal(total);
+    }
+
+    // ============================
+    // 6) PAYPAL (solo si total > 0)
+    // ============================
+    function togglePayPal(total){
+      const box = document.getElementById('paypal-button-container');
+      if(total > 0){
+        box.style.display = 'block';
+        renderPayPal(total);
+      } else {
+        box.style.display = 'none';
+        paypalRendered = false;
+        box.innerHTML = '';
+      }
+    }
+
+    function renderPayPal(total){
+      // Evita renders múltiples innecesarios; re-render si cambia el monto de forma significativa
+      if(!window.paypal){
+        // SDK aún no cargó: reintenta pronto
+        setTimeout(()=>renderPayPal(total), 300);
+        return;
+      }
+      // Limpia contenedor y vuelve a renderizar para actualizar monto
+      const box = document.getElementById('paypal-button-container');
+      box.innerHTML = '';
+      window.paypal.Buttons({
+        style:{ layout:'vertical' },
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units:[{ amount:{ value: (total).toString() , currency_code: 'COP' }, description: 'Compra StreetStyle' }]
+          });
+        },
+        onApprove: async (data, actions) => {
+          try{ await actions.order.capture(); }catch(e){}
+          alert('¡Pago aprobado en sandbox! Gracias por tu compra.');
+          cart = []; saveCart(); updateCartUI();
+        },
+        onError: (err) => {
+          console.error(err);
+          alert('Ocurrió un error con PayPal (sandbox). Revisa la consola.');
+        }
+      }).render('#paypal-button-container');
+      paypalRendered = true;
+    }
+
+    // ============================
+    // 7) DEMO "Ver" producto
+    // ============================
+    function viewOnly(id){
+      const p = productos.find(p=>p.id===id);
+      if(!p) return;
+      alert(`${p.nombre}\n${p.categoria}\nPrecio: ${fmtCOP.format(p.precio)}`);
+    }
+
+    // ============================
+    // 8) INIT
+    // ============================
+    document.getElementById('year').textContent = new Date().getFullYear();
+    renderProductos(productos);
+    aplicarFiltros();
+    updateCartUI();
+  </script>
+</body>
+</html>
